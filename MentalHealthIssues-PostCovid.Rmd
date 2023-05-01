@@ -1,0 +1,522 @@
+---
+title: "Project"
+output: html_document
+date: "2023-04-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Data
+```{r load_data, cache=TRUE, warning=FALSE, message=FALSE}
+
+mental_health <- read.csv("2019-2021.csv")
+head(mental_health)
+```
+## Load Libraries
+```{r}
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(stringr)
+library(scales)
+library(RColorBrewer)
+library(ggmap)
+library(reshape2)
+library(treemap)
+```
+
+## Clean Data
+```{r}
+# rename columns and select relevant columns
+mental_health <-
+  mental_health %>% rename(.,
+    self_employed = Are.you.self.employed.,
+    no_employees = How.many.employees.does.your.company.or.organization.have.,
+    tech_role = Is.your.primary.role.within.your.company.related.to.tech.IT.,
+    mental_health_benefits = Does.your.employer.provide.mental.health.benefits.as.part.of.healthcare.coverage.,
+    mh_discuss = Has.your.employer.ever.formally.discussed.mental.health..for.example..as.part.of.a.wellness.campaign.or.other.official.communication..,
+    mh_resources = Does.your.employer.offer.resources.to.learn.more.about.mental.health.disorders.and.options.for.seeking.help.,
+    mh_leave = If.a.mental.health.issue.prompted.you.to.request.a.medical.leave.from.work..how.easy.or.difficult.would.it.be.to.ask.for.that.leave.,
+    mh_dis_coworker = Have.you.ever.discussed.your.mental.health.with.coworkers.,
+    importance = Overall..how.much.importance.does.your.employer.place.on.mental.health.,
+    mh_currently = Do.you..currently..have.a.mental.health.disorder.,
+    mh_diagnosis = Have.you.ever.been..diagnosed..with.a.mental.health.disorder.,
+    treatment = Have.you.ever.sought.treatment.for.a.mental.health.disorder.from.a.mental.health.professional.,
+    family_history = Do.you.have.a.family.history.of.mental.illness.,
+    share = How.willing.would.you.be.to.share.with.friends.and.family.that.you.have.a.mental.illness.,
+    openly_identified = Are.you.openly.identified.at.work.as.a.person.with.a.mental.health.issue.,
+    bad_response = Have.you.observed.or.experienced.an..unsupportive.or.badly.handled.response..to.a.mental.health.issue.in.your.current.or.previous.workplace.,
+    good_response = Have.you.observed.or.experienced.a..supportive.or.well.handled.response..to.a.mental.health.issue.in.your.current.or.previous.workplace.,
+    support = Overall..how.well.do.you.think.the.tech.industry.supports.employees.with.mental.health.issues.,
+    age = Age,
+    gender = Gender,
+    race = Race,
+    country = Country,
+    state = State)
+
+head(mental_health)
+tech.health <- mental_health
+
+tech.health
+
+# Are there any NULL or NA in the following survey questions needed
+# for tech industry assessment 
+sum(is.na(tech.health$mental_vs_physical))
+sum(is.na(tech.health$mental_health_benefits))
+sum(is.na(tech.health$mh_discuss))
+sum(is.na(tech.health$mh_resources))
+
+sum(is.null(tech.health$mental_vs_physical))
+sum(is.null(tech.health$mental_health_benefits))
+sum(is.null(tech.health$mh_discuss))
+sum(is.null(tech.health$mh_resources))
+
+# Change first letter to upper in gender
+tech.health$gender <- str_to_title(tech.health$gender)
+
+# Relabel gender for consistency
+tech.health <- tech.health %>%
+  mutate(.,
+    gender = case_when(
+      gender == "Female" ~ "Female",
+      gender == "F" ~ "Female",
+      gender == "Cis Female" ~ "Female",
+      gender == "Female Cis" ~ "Female",
+      gender == "Women" ~ "Female",
+      gender == "Male" ~ "Male",
+      gender == "M" ~ "Male",
+      gender == "Cis Male" ~ "Male",
+      gender == "Male Cis" ~ "Male",
+      gender == "Man" ~ "Male",
+      gender == "male" ~ "Male",
+      gender == "MALE" ~ "Male",
+      gender == "Masculine" ~ "Male",
+      gender == "MALE" ~ "Male",
+      gender == "m" ~ "Male",
+      TRUE ~ "Other"
+    )
+  )
+
+
+tech.health <- tech.health %>% 
+  mutate(.,
+         tech_role = ifelse(tech_role =='', 'No Response', tech_role),
+         mental_health_benefits = ifelse(mental_health_benefits=='', 'No Response', mental_health_benefits),
+         mh_discuss = ifelse(mh_discuss=='', 'No Response', mh_discuss),
+         mh_resources = ifelse(mh_resources =='', 'No Response', mh_resources),
+         mh_leave = ifelse(mh_leave=='', 'No Response', mh_leave),
+         mh_dis_coworker = ifelse(mh_dis_coworker=='', 'No Response', mh_dis_coworker),      
+         importance = ifelse(importance=='', 'No Response', importance),   
+         mh_currently = ifelse(mh_currently=='', 'No Response', mh_currently),  
+         mh_diagnosis = ifelse(mh_diagnosis=='', 'No Response', mh_diagnosis),
+         family_history = ifelse(family_history=='', 'No Response', family_history),
+         openly_identified = ifelse(openly_identified=='', 'No Response', openly_identified),
+         bad_response = ifelse(bad_response=='', 'No Response', bad_response),
+         good_response = ifelse(good_response=='', 'No Response', good_response),
+         support = ifelse(support=='', 'No Response', support),
+         race = ifelse(race=='', 'No Response', race),
+         state = ifelse(state=='', 'No Response', state))
+
+tech.health <- tech.health %>% 
+  mutate(., 
+         age_group = case_when(
+           (age >= 14 & age < 18) ~ "14-17",
+           (age >= 18 & age < 25) ~ "18-24",
+           (age >= 25 & age < 35) ~ "25-34",
+           (age >= 35 & age < 45) ~ "35-44",
+           (age >= 45 & age < 55) ~ "45-54",
+           (age >= 55 & age < 65) ~ "55-65",
+           TRUE ~ "65 or older")
+  )
+# Saving the updated/cleaned dataset
+write.csv(tech.health, "Tech_Mental_Health.csv")
+
+tech.health <- read.csv("Tech_Mental_Health.csv")
+head(tech.health)
+
+
+
+```
+
+## Exploratory data analysis over Different features.
+```{r}
+# Graphs about the surveyees
+tech.health %>% ggplot(., aes(x=gender, fill=gender)) + 
+  geom_bar(aes(fill = gender)) + 
+  scale_fill_manual(values=c("steelblue2", "steelblue4", "skyblue")) +
+  theme_bw() +
+  xlab("Gender") +
+  ylab("Number of Participants") +
+  ggtitle(("Gender of Survey Participants"))
+
+#display.brewer.all()
+```
+
+```{r}
+
+# ggplot(data = tech.health, aes(x='', fill=gender)) + 
+#   geom_bar(position = "fill") +
+#   scale_fill_manual(values=c("#FF9933", "#339999", "#003366")) +
+#   coord_polar(theta = "y", start = 0) +  
+#   ggtitle(("Gender of Surveyees"))
+
+gender.df <- tech.health %>% group_by(., gender) %>% count(.,)
+gender.df$per <- round(gender.df$n/sum(gender.df$n),2)
+gender.df$ymax <- cumsum(gender.df$per)
+gender.df$ymin <- c(0, head(gender.df$ymax, n=-1))
+gender.df$labelPosition <- (gender.df$ymax + gender.df$ymin) / 2
+gender.df$label <- paste0(gender.df$gender, "\n", percent(gender.df$per))
+
+ggplot(data = gender.df, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill = gender)) +
+  geom_rect() +
+  geom_text(x = 3.5, aes(y = labelPosition, label = label), size=4.5) +
+  scale_fill_manual(values = c("steelblue2", "steelblue4", "skyblue")) +
+  coord_polar(theta = "y") +
+  xlim(c(2,4)) +
+  theme_void() +
+  theme(legend.position = "none") +
+  ggtitle("Gender of Survey Participants")
+```
+
+```{r}
+# Age-Distribution for the Respondents
+ggplot(data = tech.health, aes(x = age, fill = ..density..)) + 
+  geom_histogram(binwidth = 2) + 
+  scale_fill_gradient(low = "#f79256", high = "#1d4e89") +
+  coord_cartesian(xlim = c(0, 80))
+```
+
+```{r}
+# Filter age outliers
+# Earliest legal age to work in some countries is 14
+#tech.health <- tech.health %>% filter(., age >= 14 & age <= 80 )
+#ggplot(data = tech.health, aes(x = age)) + geom_histogram(binwidth = 2) + coord_cartesian(xlim = c(0, 80))
+
+ggplot(data = tech.health, aes(x = age, fill=gender)) + 
+  geom_histogram(binwidth = 2, position = "identity") + 
+  coord_cartesian(xlim = c(0, 80)) + facet_wrap(~gender) +
+  scale_fill_manual(values=c("steelblue2", "steelblue4", "skyblue"))
+```
+```{r}
+
+ggplot(data = tech.health, aes(y = age, color = gender)) + 
+  geom_boxplot() +
+  coord_cartesian(ylim = c(0, 80)) +  
+  scale_color_manual(values=c("steelblue2", "steelblue4", "skyblue")) +
+  ggtitle(("Age Distribution"))
+
+```
+```{r}
+# Tech companies only
+# tech.health %>% filter(., tech_company == 1) 883 rows vs 1400 rows if not filtered
+
+# Country representation
+# A lot of the countries have only 1 surveyee 
+# Select only countries that have at least 25 surveyees
+tech.health %>% 
+  group_by(., country) %>% 
+  summarise(.,representation = n()) %>% 
+  filter(., representation >= 25) %>% 
+  ggplot(., aes(x=reorder(country, -representation), y=representation)) +
+  geom_bar(aes(fill=country), stat='identity') + 
+  scale_fill_brewer(palette = "Blues") +
+  xlab("Country") +
+  ylab("Number of Respondents")
+  ggtitle("Country Representation")
+
+```
+```{r}
+# Plotting the Country Distribution for the Surveyees
+map.world <- map_data("world")
+
+tech.health$Country <- str_trim(tech.health$country)
+tech.health$Country <- recode(tech.health$Country,
+                                  'United States of America' = 'USA'
+                                  ,'United Kingdom' = 'UK'
+                                  )
+count_country <-  as.data.frame(table(tech.health$Country))
+map.world_joined <- left_join(map.world, count_country, by = c('region' = 'Var1'))
+```
+```{r}
+
+plain <- theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank(),
+  panel.background = element_rect(fill = "white"),
+  plot.title = element_text(hjust = 0.5)
+)
+
+worldCount <- ggplot(data = map.world_joined, mapping = aes(x = long, y = lat, group = group)) + 
+  coord_fixed(1.4) +
+  geom_polygon(aes(fill = Freq)) +
+  scale_fill_distiller(palette = "Set3", direction = -1) + # or direction=1
+  ggtitle("Country-wise Distribution of the Participants") +
+  plain
+
+worldCount
+```
+
+```{r}
+# State-wise Distribution (USA) for Surveyees who currently or have been diagnosed with a mental health disorder 
+map <- map_data('state')
+tech.health %>% 
+  filter(., country == "United States of America" & (mh_currently == "Yes" | mh_diagnosis == "Yes")) %>% 
+  group_by(., state) %>% 
+  summarise(., no_surveyees = n()) %>% 
+  mutate(., state_lowcase = tolower(state)) %>% 
+  ggplot(.,) +
+geom_map(map =map, aes(map_id=state_lowcase, fill=no_surveyees), color='gray') + expand_limits(x=map$long, y=map$lat) + scale_fill_continuous(high="skyblue", low="#1d4e89") +
+theme_bw() +
+theme(panel.grid.major = element_blank(),
+panel.background = element_blank(),
+axis.text=element_blank(), axis.ticks=element_blank(), axis.title=element_blank(), legend.position = c(0.90,0.25), legend.background=element_rect(fill="white", colour="white") ) + coord_map('mercator') +
+labs(title='Number of Respondents with Mental Health Illness') +
+guides(fill=guide_legend(title= "Respondents"))
+
+```
+
+```{r}
+# Company Size 
+tech.health %>% 
+  group_by(., no_employees) %>% 
+  summarise(., n = n()) %>%
+  arrange(., n) %>% 
+  ggplot(., aes(x = no_employees, y = n)) + 
+  geom_bar(aes(fill = no_employees), stat = 'identity') + 
+  labs(title='Company Size',x='Company Size (No. of Employees)', y='# of Surveyees') +
+  scale_fill_brewer(palette = "Blues") # Set the fill colors to a blue-green color palette
+
+```     
+
+#### The Empty Label in the Above Plot represents the Respondents who are 'self-employed'
+```{r}
+
+
+# Does the company take mental health seriously? 
+# Does the company address mental health issues and provide mental health benefits and resources?
+# How does it differ among the size of the company?
+# How does it differ among the type of company? Tech vs nontech company?
+
+resources.summary <- tech.health %>% 
+  summarise(Benefits = sum(mental_health_benefits == "Yes")/nrow(tech.health)*100,
+            Resources = sum(mh_resources == "Yes")/nrow(tech.health)*100,
+            Discussed = sum(mh_discuss == "Yes")/nrow(tech.health)*100)
+
+resources.summary <- as.data.frame(t(resources.summary))
+resources.summary <- resources.summary %>% 
+  rownames_to_column(var = "mental.resources") %>% 
+  rename(percent.yes = "V1")
+
+my_colors <- c("#5CACEE", "#36648B", "#87CEEB")
+
+treemap(resources.summary,
+        index = "mental.resources",
+        vSize = "percent.yes",
+        type = "index",
+        title = "Mental Health Resources",
+        fontsize.title = 15,
+        fontsize.labels = 12,
+        aspRatio = 1.5,
+        palette = my_colors
+)
+
+```
+
+```{r}
+# Overall how well do you think the tech industry supports employees with mental health issues?
+tech.health$support <- as.factor(tech.health$support)
+tech.health %>% ggplot(., aes(x='', fill=support)) + geom_bar(position = "fill") + coord_polar(theta = "y", start = 0) + ggtitle("Tech Industry's Support on Employee's Mental Health")
+
+```
+```{r} 
+# How many are aware of their family history of mental illness?
+ggplot(data = tech.health, aes(x = '', fill = family_history)) + 
+  geom_bar(position = "fill") + 
+  coord_polar(theta = "y", start = 0) + 
+  ggtitle("Family History") +
+  scale_fill_manual(values = c("#5CACEE", "#36648B", "#87CEEB")) # set custom color palette
+
+
+ggplot(data = tech.health, aes(x=family_history, fill=family_history)) + 
+  geom_bar() + 
+  scale_fill_manual(values=c("#5CACEE", "#36648B", "#87CEEB")) +
+  theme_bw()
+```
+
+```{r}
+# Are people seeking treatment from a mental health professional?
+colnames(tech.health)
+tech.health$treatment <- as.factor(tech.health$treatment)
+ggplot(data = tech.health, aes(x=treatment, fill=treatment)) + 
+  geom_bar() + 
+  scale_fill_manual(values=c("#eda84e","#339999", "#003366", "#CC6600", "#FFCC99")) +
+  theme_bw()
+```
+
+```{r}
+# Are people diagnosed with a mental health? 
+ggplot(data = tech.health, aes(x=mh_diagnosis, fill=mh_diagnosis)) + 
+  geom_bar() + 
+  scale_fill_manual(values=c("#5CACEE", "#36648B", "#87CEEB")) +
+  theme_bw()
+
+```
+
+```{r}
+# Have people observed an 'unsupportive' response in their workplace?
+ggplot(data = tech.health, aes(x='', fill = bad_response)) + 
+  geom_bar(position = "fill") + 
+  coord_polar(theta = "y", start = 0) + 
+  ggtitle("Unsupportive Response to a Mental Health Issue") + 
+  scale_fill_brewer(palette = "Blues")
+```
+```{r}
+# Have people observed an 'supportive' response in their workplace?
+ggplot(data = tech.health, aes(x='', fill = good_response)) + 
+  geom_bar(position = "fill") + 
+  coord_polar(theta = "y", start = 0) + 
+  ggtitle("Supportive Response to a Mental Health Issue") +
+  scale_fill_brewer(palette = "Blues")
+```
+
+```{r}
+# How willing are people to share with friends/family regarding their mental illness?
+tech.health$share <- as.factor(tech.health$share)
+ggplot(data = tech.health, aes(x='', fill = share)) + 
+  geom_bar(position = "fill") + 
+  coord_polar(theta = "y", start = 0) + 
+  ggtitle("Share with Your Friends/Family") +
+  scale_fill_brewer(palette = "Paired")
+```
+
+```{r}
+# Gender-wise distribution over how willing are people discuss with their coworkers?
+ggplot(data = tech.health, aes(x=mh_dis_coworker, fill=mh_dis_coworker)) + 
+  geom_bar(aes(fill = gender)) + 
+  scale_fill_manual(values=c("#5CACEE", "#36648B", "#87CEEB")) +
+  theme_bw()
+```
+
+```{r}
+# Gender Distribution of Employees working in large-size companies
+tech.health %>% 
+            filter(., no_employees %in% c("26-100", "100-500", "More than 1000")) %>% 
+            ggplot(., aes(x = no_employees)) +
+            geom_bar(aes(fill = gender), position = "dodge") + 
+            scale_fill_manual(values=c("#5CACEE", "#36648B", "#87CEEB")) +
+            xlab("No of Employees") +
+            theme_bw()
+```
+```{r}
+# Employees who are self-employed (not part of company)?
+tech.health$self_employed <- as.factor(tech.health$self_employed)
+ggplot(data = tech.health, aes(x='', fill = self_employed)) + 
+  geom_bar(position = "fill") + 
+  coord_polar(theta = "y", start = 0) + 
+  ggtitle("Surveyees (whether they are self-employed?)") + 
+  scale_fill_brewer(palette = "Blues")
+```
+```{r}
+# How much importance does an employer give on mental health?
+tech.health$importance <- as.factor(tech.health$importance)
+tech.health %>% ggplot(., aes(x='', fill=importance)) + geom_bar(position = "fill") + coord_polar(theta = "y", start = 0) + ggtitle("Employer's Importance on Employee's Mental Health")
+```
+## Data Transformations
+```{r}
+tech.health <- tech.health %>% 
+  mutate(.,
+         tech_role = ifelse(is.na(tech_role), 'No Response', tech_role),
+         mh_dis_coworker =  ifelse(is.na(mh_dis_coworker), 'No Response', mh_dis_coworker),
+         importance = ifelse(is.na(importance), 'No Response', importance))
+tech.health <- tech.health %>% mutate_if(is.character, as.factor)
+
+#glimpse(tech.health)
+```
+
+```{r}
+tech.health$no_employees = factor(tech.health$no_employees, c("","1-5","6-25","26-100","100-500","500-1000","More than 1000"))
+
+library(caret)
+library(lattice)
+# proportion of the target variable (treatment)
+prop.table(table(tech.health$treatment))
+
+# Training - Test Split
+set.seed(901)
+index <- createDataPartition(tech.health$treatment, p=0.8, list=FALSE)
+tech.health.train <- tech.health[index,]
+tech.health.test <- tech.health[-index,]
+
+prop.table(table(tech.health.train$treatment)) # Proportion of Target Variable in Train dataset.
+prop.table(table(tech.health.test$treatment))  # Proportion of Target Variable in Test dataset.
+
+```
+## PREDICTIVE MODELLING
+```{r}
+# Baseline Model - Logistic regression 
+# tC <- trainControl(method="boot", number = 1000) # Applying Bootstrap with N = 1000
+ lm <- train(treatment ~ ., method="glm", family="binomial",data=tech.health)
+ summary(lm)
+```
+```{r}
+# Fetching the Test Accuracy
+tech.health.test$self_employed <- as.factor(tech.health.test$self_employed)
+
+predict_lm <- predict(object = lm,newdata=tech.health.test,type="prob")
+prd <- ifelse(predict_lm >= 0.5, 1, 0)
+
+cat("Accuracy on Testing Dataset (SVM): ",mean(prd == tech.health.test$treatment) * 100,"%")
+```
+```{r}
+# Implementing Naive Bayes
+library(e1071)
+library(naivebayes)
+
+naive_bayes_classifier <- naiveBayes(treatment ~ .,data=tech.health.train)
+naive_bayes_classifier
+
+nb_test <- predict(naive_bayes_classifier, tech.health.test)
+cat("Accuracy on Testing Dataset : ",mean(nb_test == tech.health.test$treatment) * 100,"%")
+```
+
+```{r}
+# Confusion Matrix
+table(nb_test, tech.health.test$treatment)
+```
+```{r}
+# Implementing Decision Tree
+library(rpart)
+library(rpart.plot)
+
+dt <- rpart(treatment ~ .,data=tech.health.train)
+rpart.plot(dt)
+
+# Calculating Accuracy
+dt_pred <- predict(dt, tech.health.test, type='class')
+confusionMatrix(dt_pred, tech.health.test$treatment)
+
+```
+```{r}
+# Implementing Random Forest - takes time
+model_forest <- train(treatment ~.,data=tech.health.train,method="rf")
+summary(model_forest)
+```
+```{r}
+pred_rf <- predict(model_forest, tech.health.test, type="raw")
+confusionMatrix(pred_rf, tech.health.test$treatment)
+```
+```{r}
+# Using SVM
+svm_classifier <- svm(treatment ~ ., data = tech.health.train, kernel="linear")
+svm_pred <- predict(svm_classifier, data=tech.health.test,type="response")
+#cat(length(svm_pred), dim(tech.health.test), dim(tech.health.train))
+
+cat("Accuracy on Testing Dataset (SVM): ",mean(svm_pred == tech.health.test$treatment) * 100,"%")
+```
