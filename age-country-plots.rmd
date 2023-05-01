@@ -1,0 +1,100 @@
+---
+title: "DPA-Project-MentalStress"
+author: "Aditya Sharma"
+date: "2023-02-25"
+output: html_document
+---
+```{r}
+survey_data <- read.csv("2014-cleaned.csv")
+
+head(survey_data)
+```
+
+```{r}
+data10 <- table(as.factor(survey_data$anonymity.protected))
+data10
+```
+
+
+
+```{r}
+pie(data10,main = "Anonymity protected if you choose to take advantage of mental health treatment resources?", col=c("#f79256", "#8A7070", "#1d4e89"),cex.main=0.8) 
+```
+
+
+```{r}
+#summary(survey_data)
+
+
+survey_data <- subset(survey_data, Age > 1 & Age < 100)
+min_age=min(survey_data$Age)
+max_age=max(survey_data$Age)
+cat(min_age, max_age)
+```
+```{r}
+library(ggplot2)
+
+#my_hist=hist(survey_data$Age , breaks=40, plot=F)
+ 
+# Color vector
+#my_color= ifelse(my_hist$breaks < 15, rgb(0.2,0.8,0.5,0.5) , ifelse (my_hist$breaks >=15, "purple", rgb(0.2,0.2,0.2,0.2) ))
+ 
+# Final plot
+#plot(my_hist, col=my_color , border=F , main="" , xlab="Age of the employee", xlim=c(10,75) )
+
+ggplot(survey_data, aes(x=Age, fill = after_stat(x))) +
+  geom_histogram(binwidth = 1.4) +
+  scale_fill_gradient(low='#f79256', high='#1d4e89') + labs(title="Age Distribution for the Respondents")
+
+ggsave("age-dist-2014.png")
+
+```
+```{r}
+library(tidyverse)
+library(ggmap)
+
+map.world <- map_data("world")
+head(map.world)
+
+survey_data$Country <- str_trim(survey_data$Country)
+
+
+survey_data$Country <- recode(survey_data$Country,
+                                  'United States' = 'USA'
+                                  ,'United Kingdom' = 'UK'
+                                  )
+#length(unique(survey_data$Country))
+
+count_country <-  as.data.frame(table(survey_data$Country))
+count_country
+# LEFT JOIN
+map.world_joined <- left_join(map.world, count_country, by = c('region' = 'Var1'))
+map.world_joined
+
+```
+```{r}
+
+plain <- theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank(),
+  panel.background = element_rect(fill = "white"),
+  plot.title = element_text(hjust = 0.5)
+)
+
+worldCount <- ggplot(data = map.world_joined, mapping = aes(x = long, y = lat, group = group)) + 
+  coord_fixed(1.4) +
+  geom_polygon(aes(fill = Freq)) +
+  scale_fill_gradient(low = "#f79256", 
+    high = "#1d4e89") + # or direction=1
+  ggtitle("Country-wise Distribution of the Participants") +
+  plain
+
+worldCount
+ggsave("worldCount.png")
+
+```
+

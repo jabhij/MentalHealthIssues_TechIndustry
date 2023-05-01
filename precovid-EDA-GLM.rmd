@@ -1,0 +1,357 @@
+
+```{r}
+library(ggplot2)
+library(readr)
+```
+```{r}
+df <- read_csv("2014.csv")
+
+head(df)
+summary(df)
+```
+```{r}
+colnames(df)[which(names(employedData)== "Are you self-employed?")] <- c('self.emplyed')
+head(df)
+summary(as.factor(df$self.emplyed))
+```
+```{r}
+summary(as.factor(df$self.emplyed))
+df$self.emplyed = as.factor(df$self.emplyed)
+```
+
+```{r}
+#replace timestamp with year 
+df$Timestamp = rep(c(2014), each = nrow(df)) #seq(from = 2014, to = 2014, by = 0, length.out = nrow(df))
+head(df)
+```
+
+
+
+```{r}
+df$Age = as.integer(df$Age)
+head(df)
+#hist(df$Age, breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100))
+```
+
+```{r}
+df$Gender[df$Gender == 'Male' | df$Gender == 'M' | df$Gender == 'm' | df$Gender == 'male'] <- 'M'
+df$Gender[df$Gender == 'Female' | df$Gender == 'F' | df$Gender == 'f' | df$Gender == 'female'] <- 'F'
+df$Gender[df$Gender != 'M' & df$Gender != 'F'] <- 'NA'
+
+df$Gender <- as.factor(df$Gender)
+head(df)
+#view(df)
+#hist(df$Gender)
+```
+
+```{r}
+barplot(prop.table(table(df$Gender)), col= c("steelblue2", "steelblue4", "skyblue"))
+```
+
+```{r}
+ggplot(df, aes(x=Gender, fill = after_stat(x))) +
+  geom_bar() +
+  scale_fill_gradient(low='#f79256', high='#1d4e89') + labs(title="Gender Distribution for the Respondents")
+```
+
+
+
+
+```{r}
+USdata <- subset(df, Country=="United States")
+#View(USdata)
+```
+```{r}
+employedData <- subset(USdata,self.emplyed=="No")
+```
+```{r}
+#View(employedData)
+colnames(df)[which(names(df)== "Do you feel that your employer takes mental health as seriously as physical health?")] <- c('serious')
+#View(employedData)
+table(df$serious)
+data1 <- table(df$serious)
+
+pie(data1, col = c("#f79256", "#8A7070", "#1d4e89")) #, cols = c("Don't Know", "No", "Yes"))
+```
+
+```{r}
+colnames(df)[which(names(df)== "employer takes mental health as seriously as physical health?")] <- c('serious')
+#View(employedData)
+table(df$serious)
+data1 <- table(df$serious)
+pie(data1, main = "Employer takes mental health as seriously as physical health?", col = c("#f79256", "#8A7070", "#1d4e89")) # center color: #8A7070
+```
+
+
+
+```{r}
+#rename target variable
+colnames(df)[which(names(df)== "Have you sought treatment for a mental health condition?")] <- c('seek.treatment')
+head(df)
+```
+
+
+
+```{r}
+ggplot(df, aes(x = df$Gender, fill = df$seek.treatment, stat = "identity")) +
+  geom_bar(position = "dodge") +
+  labs(title = "Gender", y = "Count", fill = "Seek Treatment") +
+  scale_fill_manual(values = c("#f79256", "#1d4e89")) + 
+  facet_wrap(~df$Gender)
+```
+```{r}
+
+head(df)
+```
+
+```{r}
+ggplot(df, aes(x = df$self.emplyed, fill = df$seek.treatment, stat = "identity")) +
+  geom_bar(position = "dodge") +
+  labs(title = "Self Employed", y = "Count", fill = "Seek Treatment") +
+  scale_fill_manual(values = c("#f79256", "#1d4e89")) + 
+  facet_wrap(~df$self.emplyed)
+```
+```{r}
+head(df)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Do you have a family history of mental illness?")] <- c('family.history')
+df$family.history <- as.factor(df$family.history)
+```
+
+```{r}
+summary(df$family.history)
+```
+
+```{r}
+ggplot(df, aes(x = df$family.history, fill = df$seek.treatment, stat = "identity")) +
+  geom_bar(position = "dodge") +
+  labs(title = "Family History", y = "Count", fill = "Seek Treatment") +
+  scale_fill_manual(values = c("#f79256", "#1d4e89")) + 
+  facet_wrap(~df$family.history)
+```
+```{r}
+colnames(df)[which(names(df)== "If you have a mental health condition, do you feel that it interferes with your work?")] <- c('MH.interferes.work')
+df$MH.interferes.work <- as.factor(df$MH.interferes.work)
+```
+
+```{r}
+summary(df$MH.interferes.work)
+```
+
+```{r}
+barplot(prop.table(table(df$MH.interferes.work)), col = c("#f79256", "#AE7B67", "#666578", "#1d4e89"), main = "Does your mental health interfere with your work?")
+```
+```{r}
+colnames(df)[which(names(df)== "How many employees does your company or organization have?")] <- c('company.size')
+
+```
+
+```{r}
+df$company.size <- as.factor(df$company.size)
+summary(df$company.size)
+```
+```{r}
+head(df)
+```
+
+```{r}
+ggplot(df, aes(x = df$company.size, fill = df$seek.treatment, stat = "identity")) +
+  geom_bar(position = "dodge") +
+  labs(title = "Company Size - No. of Employees", y = "Count", fill = "Seek Treatment") +
+  facet_wrap(~df$company.size)
+```
+```{r}
+colnames(df)[which(names(df)== "Do you work remotely (outside of an office) at least 50% of the time?")] <- c('work.remotely')
+
+```
+
+```{r}
+colnames(df)[which(names(df)== "If you live in the United States, which state or territory do you live in?")] <- c('State')
+df$State <- as.factor(df$State)
+```
+
+```{r}
+df$work.remotely <- as.factor(df$work.remotely)
+summary(df$work.remotely)
+```
+```{r}
+head(df)
+```
+
+```{r}
+ggplot(df, aes(x = df$work.remotely, fill = df$seek.treatment, stat = "identity")) +
+  geom_bar(position = "dodge") +
+  labs(x = "Remote Work Flexibility", y = "Count", fill = "Seek Treatment", title = "Remote Work Flexibility") +
+  facet_wrap(~df$work.remotely)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Does your employer provide mental health benefits?")] <- c('MH.benefits')
+df$MH.benefits <- as.factor(df$MH.benefits)
+```
+
+```{r}
+#df$work.remotely <- as.factor(df$work.remotely)
+summary(df$MH.benefits)
+```
+
+
+```{r}
+ggplot(df, aes(x = df$MH.benefits, fill = df$seek.treatment, stat = "identity")) +
+  geom_bar(position = "dodge") +
+  labs( y = "Count", fill = "Seek Treatment", title = "Employer Provides Mental Health Benefits") +
+  scale_fill_manual(values = c("#f79256", "#1d4e89")) +
+  facet_wrap(~df$MH.benefits)
+```
+```{r}
+head(df)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Is your employer primarily a tech company/organization?")] <- c('tech.company')
+df$tech.company <- as.factor(df$tech.company)
+summary(df$tech.company)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Do you know the options for mental health care your employer provides?")] <- c('know.care.options')
+df$know.care.options <- as.factor(df$know.care.options)
+summary(df$know.care.options)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Has your employer ever discussed mental health as part of an employee wellness program?")] <- c('employer.discussed.MH.wellness')
+df$employer.discussed.MH.wellness <- as.factor(df$employer.discussed.MH.wellness)
+summary(df$employer.discussed.MH.wellness)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Does your employer provide resources to learn more about mental health issues and how to seek help?")] <- c('employer.privode.resources')
+df$employer.privode.resources <- as.factor(df$employer.privode.resources)
+summary(df$employer.privode.resources)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Is your anonymity protected if you choose to take advantage of mental health or substance abuse treatment resources?")] <- c('anonymity.protected')
+df$anonymity.protected <- as.factor(df$anonymity.protected)
+summary(df$anonymity.protected)
+```
+```{r}
+head(df)
+```
+
+```{r}
+df$Country = as.factor(df$Country)
+df$seek.treatment = as.factor(df$seek.treatment)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Do you think that discussing a mental health issue with your employer would have negative consequences?")] <- c('MH.discuss.neg.consq')
+df$MH.discuss.neg.consq <- as.factor(df$MH.discuss.neg.consq)
+summary(df$MH.discuss.neg.consq)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Do you think that discussing a physical health issue with your employer would have negative consequences?")] <- c('PH.discuss.neg.consq')
+df$PH.discuss.neg.consq <- as.factor(df$PH.discuss.neg.consq)
+summary(df$PH.discuss.neg.consq)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Would you be willing to discuss a mental health issue with your coworkers?")] <- c('discuss.MH.coworkers')
+df$discuss.MH.coworkers <- as.factor(df$discuss.MH.coworkers)
+summary(df$discuss.MH.coworkers)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Would you be willing to discuss a mental health issue with your direct supervisor(s)?")] <- c('discuss.MH.supervisor')
+df$discuss.MH.supervisor <- as.factor(df$discuss.MH.supervisor)
+summary(df$discuss.MH.supervisor)
+```
+
+Would you bring up a mental health issue with a potential employer in an interview?
+
+```{r}
+colnames(df)[which(names(df)== "Would you bring up a mental health issue with a potential employer in an interview?")] <- c('MH.inerview')
+df$MH.inerview <- as.factor(df$MH.inerview)
+summary(df$MH.inerview)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Would you bring up a physical health issue with a potential employer in an interview?")] <- c('PH.inerview')
+df$PH.inerview <- as.factor(df$PH.inerview)
+summary(df$PH.inerview)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Do you feel that your employer takes mental health as seriously as physical health?")] <- c('serious')
+df$serious <- as.factor(df$serious)
+summary(df$serious)
+```
+
+```{r}
+colnames(df)[which(names(df)== "Have you heard of or observed negative consequences for coworkers with mental health conditions in your workplace?")] <- c('MH.neg.cons')
+df$MH.neg.cons <- as.factor(df$MH.neg.cons)
+summary(df$MH.neg.cons)
+```
+
+```{r}
+head(df)
+```
+
+
+
+
+```{r}
+head(df)
+```
+
+```{r}
+colnames(df)[which(names(df)== "How easy is it for you to take medical leave for a mental health condition?")] <- c('easy.leave')
+df$easy.leave <- as.factor(df$easy.leave)
+summary(df$easy.leave)
+```
+
+```{r}
+df2 = subset(df, select = -`Any additional notes or comments`)
+head(df2)
+```
+
+```{r}
+fit = glm(seek.treatment ~ ., data = df2, family = binomial)
+summary(fit)
+```
+
+```{r}
+head(df2)
+
+write.csv(df2, "2014-cleaned.csv")
+```
+
+```{r}
+df = read.csv('2014-cleaned.csv')
+head(df)
+```
+```{r}
+
+data10 <- table(as.factor(df$anonymity.protected))
+data10
+
+```
+
+```{r}
+plot(data10)
+```
+
+```{r}
+pie(data10,main = "Anonymity protected if you choose to take advantage of mental health treatment resources?", col=c("#f79256", "#8A7070", "#1d4e89"),cex.main=0.8) 
+```
+
+Most important factors in decreasing order of significance: 
+1. Mental health interferes with work
+2. Family history
+3. Whether employers proved MH benefits and employees know about it
+4. Gender
+5. Whether the employee's anonymity is maintained if they choose to opt for MH care

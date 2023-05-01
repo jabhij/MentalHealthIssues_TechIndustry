@@ -1,0 +1,68 @@
+---
+title: "precovid_postcovid_mental_health"
+author: "Muhammad Ans"
+date: "2023-04-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(ggplot2)
+library(readr)
+X2014 <- read_csv("2014.csv", show_col_types = FALSE)
+XMHIT_19_21 <- read_csv("2019-2021.csv", show_col_types = FALSE)
+```
+
+
+```{r}
+colnames(X2014)[which(names(X2014) == "Have you sought treatment for a mental health condition?")] <- c('sought_treatment')
+pre_covid_result <- X2014$sought_treatment
+head(pre_covid_result)
+pre_covid_table <- table(pre_covid_result) 
+pre_covid_perc <- round(prop.table(pre_covid_table) * 100)
+
+```
+
+
+```{r}
+colnames(XMHIT_19_21)[which(names(XMHIT_19_21) == "Have you ever sought treatment for a mental health disorder from a mental health professional?")] <- c('sought_treatment')
+XMHIT_19_21$sought_treatment[XMHIT_19_21$sought_treatment == '0'] <- 'No'
+XMHIT_19_21$sought_treatment[XMHIT_19_21$sought_treatment == '1'] <- 'Yes'
+head(XMHIT_19_21)
+
+post_covid_result <- XMHIT_19_21$sought_treatment
+#table(post_covid_resut)
+post_covid_table <- table(post_covid_result) 
+post_covid_perc <- round(prop.table(post_covid_table) * 100)
+
+
+```
+
+
+
+```{r}
+# create a data frame with the percentage values for both pre-COVID and post-COVID files
+df <- data.frame(
+  Time_Period = factor(c(rep("Pre-COVID", 2), rep("Post-COVID", 2)), 
+                       levels = c( "Pre-COVID","Post-COVID")),
+  Sought_Help = rep(c("Yes", "No"), 2),
+  Percent = c(pre_covid_perc, post_covid_perc)
+)
+# plot the side-by-side bar chart
+ggplot(df, aes(x = Time_Period, y = Percent, fill = Sought_Help)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  scale_fill_manual(values = c("steelblue4", "coral"), 
+                    labels = c("Yes", "No")) +
+  labs(x = "Time Period", y = "Percentage", 
+       title = "Sought Help for Mental Health") +
+  scale_y_continuous(labels = scales::percent_format(scale = 1, accuracy = 1), 
+                     limits = c(0, 100)) +
+  theme_classic()
+```
+
+

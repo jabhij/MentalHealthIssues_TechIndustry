@@ -1,0 +1,105 @@
+```{r}
+library(ggplot2)
+library(readr)
+X2014 <- read_csv("2014.csv", show_col_types = FALSE)
+
+#View(X2014)
+USdata <- subset(X2014, Country=="United States") 
+#View(USdata)
+
+employedData <- subset(USdata,`Are you self-employed?`=="No")
+
+#View(employedData)
+colnames(employedData)[which(names(employedData) == "Do you feel that your employer takes mental health as seriously as physical health?")] <- c('serious') 
+#View(employedData)
+table(employedData$serious) 
+data1 <- table(employedData$serious)
+```
+
+
+```{r}
+pie(data1, main = "Employer takes mental health as seriously as physical health?", col=c("steelblue2", "steelblue4", "skyblue"), cex.main=0.8)
+
+```
+
+```{r}
+colnames(employedData)[which(names(employedData) == "Do you think that discussing a physical health issue with your employer would have negative consequences?")] <- c('negative_effect_ph')
+table(employedData$negative_effect_ph) 
+data2 <- table(employedData$negative_effect_ph)
+
+pie(data2, cols = c("Don't Know", "No", "Yes"),main = "Discussing a physical health issue with your employer would have negative consequences?", col=c("steelblue2", "steelblue4", "skyblue"),cex.main=0.8)
+
+```
+
+```{r}
+colnames(employedData)[which(names(employedData) == "Do you think that discussing a mental health issue with your employer would have negative consequences?")] <- c('negative_effect_mn')
+table(employedData$negative_effect_mn) 
+data3 <- table(employedData$negative_effect_mn)
+
+pie(data3, cols = c("Don't Know", "No", "Yes"),main = "Discussing a mental health issue with your employer would have negative consequences?", col=c("steelblue2", "steelblue4", "skyblue"),cex.main=0.8)
+
+```
+```{r}
+colnames(employedData)[which(names(employedData) == "Would you bring up a mental health issue with a potential employer in an interview?")] <- c('interview_mh')
+table(employedData$interview_mh) 
+data4 <- table(employedData$interview_mh)
+
+pie(data4, cols = c("Don't Know", "No", "Yes"),main = "Would you bring up a mental health issue with a potential employer in an interview?", col=c("steelblue2", "steelblue4", "skyblue"),cex.main=0.8)
+```
+
+```{r}
+colnames(employedData)[which(names(employedData) == "Would you bring up a physical health issue with a potential employer in an interview?")] <- c('interview_ph')
+table(employedData$interview_ph) 
+data5 <- table(employedData$interview_ph)
+
+pie(data5, cols = c("Don't Know", "No", "Yes"),main = "Would you bring up a physical health issue with a potential employer in an interview?", col=c("steelblue2", "steelblue4", "skyblue"),cex.main=0.8)
+```
+```{r}
+colnames(employedData)[which(names(employedData) == "Does your employer provide mental health benefits?")] <- c('benefits_mh')
+table(employedData$benefits_mh) 
+data6 <- table(employedData$benefits_mh)
+
+pie(data6, cols = c("Don't Know", "No", "Yes"),main = "Does your employer provide mental health benefits?", col=c("steelblue2", "steelblue4", "skyblue"),cex.main=0.8)
+```
+
+```{r}
+colnames(employedData)[which(names(employedData) == "Do you know the options for mental health care your employer provides?")] <- c('knowOption_mh')
+table(employedData$knowOption_mh) 
+data7 <- table(employedData$knowOption_mh)
+
+pie(data7, cols = c("Not sure", "No", "Yes"),main = "Do you know the options for mental health care your employer provides?", col=c("steelblue2", "steelblue4", "skyblue"),cex.main=0.8)
+```
+
+```{r}
+colnames(employedData)[which(names(employedData) == "Has your employer ever discussed mental health as part of an employee wellness program?")] <- c('wellness_prog')
+table(employedData$wellness_prog) 
+data8 <- table(employedData$wellness_prog)
+
+pie(data8, cols = c("Don't know", "No", "Yes"),main = "Has your employer ever discussed mental health as part of an employee wellness program?", col=c("steelblue2", "steelblue4", "skyblue"),cex.main=0.8)
+```
+```{r}
+colnames(employedData)[which(names(employedData) == "Does your employer provide resources to learn more about mental health issues and how to seek help?")] <- c('provide_resources')
+table(employedData$provide_resources) 
+data9 <- table(employedData$provide_resources)
+
+pie(data9, cols = c("Don't know", "No", "Yes"),main = "Does your employer provide resources to learn more about mental health issues and how to seek help?", col=c("steelblue2", "steelblue4", "skyblue"),cex.main=0.8) 
+```
+c("#f79256", "#8A7070", "#1d4e89")
+
+```{r}
+emplyedData = read.csv('2014.csv')
+colnames(employedData)[which(names(employedData) == "Anonymity protected if you take advantage of mental health or substance abuse treatment resources?")] <- c('anonymity')
+table(employedData$anonymity) 
+data10 <- table(employedData$anonymity)
+
+pie(data10,main = "Anonymity protected if you choose to take advantage of mental health treatment resources?", col=c("steelblue2", "steelblue4", "skyblue"),cex.main=0.8) 
+```
+```{r}
+colnames(employedData)[which(names(employedData) == "How easy is it for you to take medical leave for a mental health condition?")] <- c('leave')
+table(employedData$leave) 
+data11 <- table(employedData$leave)
+
+pie(data11, cols = c("Don't know","Somewhat difficult","Somewhat easy","Very difficult","Very easy"),main = "How easy is it for you to take medical leave for a mental health condition?", col=c("steelblue2", "steelblue4", "skyblue"),cex.main=0.8) 
+```
+
+
