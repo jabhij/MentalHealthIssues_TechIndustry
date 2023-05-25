@@ -16,3 +16,11 @@ The project analyzes the responses from an annual survey that measures attitudes
 
 ## Data Source
 [Google Drive](https://shorturl.at/gmuIR)
+
+### Catch me
+For any query, ping me on 
+- LinkedIn: [@jabhij](https://www.linkedin.com/in/jabhij/)
+- Twitter: [@jabhij](https://twitter.com/jabhij)
+- Web: [LetUsTweak](http://letustweak.com)
+
+Hope, it helps!! ヅ
