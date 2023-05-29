@@ -20,4 +20,3 @@ The project analyzes the responses from an annual survey that measures attitudes
 ### Catch Us
 For any query, ping me on 
 - LinkedIn: [@jabhij](https://www.linkedin.com/in/jabhij/)
-
